@@ -6,11 +6,10 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"strings"
 
 	"golang.org/x/term"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/protolambda/proto-log/log"
 )
 
 type Format string
@@ -46,18 +45,14 @@ func (f *Format) Set(v string) error {
 	return nil
 }
 
-func (f Format) Handler(color bool) func(writer io.Writer) slog.Handler {
+func (f Format) Handler() func(writer io.Writer, opts ...log.FormatOption) slog.Handler {
 	switch f {
 	case FormatJSON:
 		return log.JSONHandler
 	case FormatTerminal:
-		return func(w io.Writer) slog.Handler {
-			return log.NewTerminalHandler(w, color)
-		}
+		return log.TerminalHandler
 	case FormatLogFmt:
-		return func(w io.Writer) slog.Handler {
-			return log.LogfmtHandlerWithLevel(w, log.LevelTrace)
-		}
+		return log.LogfmtHandler
 	default:
 		return nil
 	}
@@ -73,23 +68,11 @@ func (lvl *Level) Set(v string) error {
 	if lvl == nil {
 		return errors.New("cannot set nil Level")
 	}
-	lower := strings.ToLower(v) // ignore case
-	switch lower {
-	case "trace", "trce":
-		*lvl = Level(log.LevelTrace)
-	case "debug", "dbug":
-		*lvl = Level(log.LevelDebug)
-	case "info":
-		*lvl = Level(log.LevelInfo)
-	case "warn":
-		*lvl = Level(log.LevelWarn)
-	case "error", "eror", "err":
-		*lvl = Level(log.LevelError)
-	case "crit":
-		*lvl = Level(log.LevelCrit)
-	default:
-		return fmt.Errorf("unknown level: %q", v)
+	x, err := log.LevelFromString(v)
+	if err != nil {
+		return err
 	}
+	*lvl = Level(x)
 	return nil
 }
 
@@ -105,9 +88,12 @@ type Config struct {
 	// Out to write log data to. If nil, os.Stdout will be used.
 	Out io.Writer `ask:"-"`
 
-	Level  Level  `ask:"--log.level" help:"Log level: 'trace', 'debug', 'info', 'warn', 'error', 'crit'. Aliases and mixed-case are excepted."`
-	Format Format `ask:"--log.format" help:"Log format: 'text', 'terminal', 'logfmt', 'json'."`
-	Color  bool   `ask:"--log.color" help:"Enable log coloring (terminal format only)"`
+	Level     Level  `ask:"--log.level" help:"Log level: 'trace', 'debug', 'info', 'warn', 'error', 'crit'. Aliases and mixed-case are excepted."`
+	Format    Format `ask:"--log.format" help:"Log format: 'text', 'terminal', 'logfmt', 'json'."`
+	Color     bool   `ask:"--log.color" help:"Enable log coloring (terminal format only)"`
+	Time      bool   `ask:"--log.time" help:"Include time in logs"`
+	Source    bool   `ask:"--log.src" help:"Include source-file/number info in logs"`
+	SourceDir string `ask:"--log.src-dir" help:"Resolve source-file info (if enabled) as relative to this dir"`
 }
 
 func (c *Config) Default() {
@@ -117,12 +103,22 @@ func (c *Config) Default() {
 	c.Format = FormatTerminal
 	c.Color = term.IsTerminal(int(os.Stdout.Fd()))
 	c.Level = Level(slog.LevelInfo)
+	c.Time = true
+	c.Source = false
+	c.SourceDir = ""
 }
 
 func (c *Config) New() log.Logger {
-	hFn := c.Format.Handler(c.Color)
-	h := hFn(c.Out)
-	h = NewDynamicLogHandler(c.Level.Level(), h)
-	l := log.NewLogger(h)
+	hFn := c.Format.Handler()
+	h := hFn(c.Out,
+		log.WithColor(c.Color),
+		log.WithExcludeTime(!c.Time),
+		log.WithIncludeSource(c.Source),
+		log.WithSourceRelDir(c.SourceDir),
+	)
+	l := log.New(h,
+		log.ContextMod(),
+		log.LevelMod(c.Level.Level()),
+	)
 	return l
 }

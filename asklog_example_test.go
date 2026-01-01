@@ -20,10 +20,23 @@ func (m *MainCmd) Default() {
 func (m *MainCmd) Run(ctx context.Context, args ...string) error {
 	logger := m.LogConfig.New()
 	logger.Info("Hello world!", "foobar", m.Foobar)
+	logger.Trace("Trace everything!")
+	logger.Debug("Catch the bugs!")
 	// ...
 	return nil
 }
 
-func Example() {
-	ask.Run(&MainCmd{})
+func ExampleConfig() {
+	d, err := ask.Load(&MainCmd{})
+	if err != nil {
+		panic(err)
+	}
+	if _, err := d.Execute(context.Background(), &ask.ExecutionOptions{},
+		"example-cmd", "--foobar=123",
+		"--log.time=false", "--log.level=debug"); err != nil {
+		panic(err)
+	}
+	// Output:
+	// INFO  Hello world!                             foobar=123
+	// DEBUG Catch the bugs!
 }
