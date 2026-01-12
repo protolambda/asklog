@@ -3,7 +3,7 @@
 Log config / utils for CLI tool building with
 [`github.com/protolambda/ask`](https://github.com/protolambda/ask).
 
-This uses the [`github.com/protolambda/proto-log/log`](https://github.com/ethereum/go-ethereum/tree/master/log) package,
+This uses [`github.com/protolambda/proto-log`](https://github.com/protolambda/proto-log),
 fully compatible with `slog`.
 
 ## Example
