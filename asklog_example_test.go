@@ -8,16 +8,14 @@ import (
 )
 
 type MainCmd struct {
+	// Inline the log flags. Ask applies asklog.Config.Default() automatically,
+	// before the Default of MainCmd (if any), so MainCmd can override the log defaults.
 	LogConfig asklog.Config `ask:"."`
 
 	Foobar string `ask:"--foobar" help:"Some other flag"`
 }
 
-func (m *MainCmd) Default() {
-	m.LogConfig.Default()
-}
-
-func (m *MainCmd) Run(ctx context.Context, args ...string) error {
+func (m *MainCmd) Run(ctx context.Context) error {
 	logger := m.LogConfig.New()
 	logger.Info("Hello world!", "foobar", m.Foobar)
 	logger.Trace("Trace everything!")
@@ -27,13 +25,9 @@ func (m *MainCmd) Run(ctx context.Context, args ...string) error {
 }
 
 func ExampleConfig() {
-	d, err := ask.Load(&MainCmd{})
+	err := ask.Run(context.Background(), &MainCmd{},
+		[]string{"--foobar=123", "--log.time=false", "--log.level=debug"})
 	if err != nil {
-		panic(err)
-	}
-	if _, err := d.Execute(context.Background(), &ask.ExecutionOptions{},
-		"example-cmd", "--foobar=123",
-		"--log.time=false", "--log.level=debug"); err != nil {
 		panic(err)
 	}
 	// Output:
