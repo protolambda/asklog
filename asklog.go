@@ -89,13 +89,16 @@ type Config struct {
 	Out io.Writer `ask:"-"`
 
 	Level     Level  `ask:"--log.level" help:"Log level: 'trace', 'debug', 'info', 'warn', 'error', 'crit'. Aliases and mixed-case are excepted."`
-	Format    Format `ask:"--log.format" help:"Log format: 'text', 'terminal', 'logfmt', 'json'."`
+	Format    Format `ask:"--log.format" help:"Log format: 'terminal', 'logfmt', 'json'."`
 	Color     bool   `ask:"--log.color" help:"Enable log coloring (terminal format only)"`
 	Time      bool   `ask:"--log.time" help:"Include time in logs"`
 	Source    bool   `ask:"--log.src" help:"Include source-file/number info in logs"`
 	SourceDir string `ask:"--log.src-dir" help:"Resolve source-file info (if enabled) as relative to this dir"`
 }
 
+// Default sets the default log configuration.
+// Ask applies it automatically (see ask.InitDefault) when Config is embedded in a command,
+// before the Default of the command itself, so the command may override these defaults.
 func (c *Config) Default() {
 	if c.Out == nil {
 		c.Out = os.Stdout
