@@ -1,5 +1,5 @@
-github.com/protolambda/ask v0.4.0 h1:Jn1ktnScvYarmQ3Mx7qZy6zStVrq7ozP/eeJKcFTYBw=
-github.com/protolambda/ask v0.4.0/go.mod h1:CDdAevfEfpjtp6aSk6F/M+lqjtbyPI4pbjfFqp8SaIA=
+github.com/protolambda/ask v0.5.0 h1:8SkZQjtEFB7WMQCj1+Oc15vJ8bfX6SDl/MGkuGIT7r0=
+github.com/protolambda/ask v0.5.0/go.mod h1:CDdAevfEfpjtp6aSk6F/M+lqjtbyPI4pbjfFqp8SaIA=
 github.com/protolambda/proto-log v0.2.1 h1:4zXvMrpaMlTi4ks60y/48Iyr9aeXBOJP8mdAueob0wM=
 github.com/protolambda/proto-log v0.2.1/go.mod h1:LQGsuafwhnC/7y1hasZcXTDb5qJ/kQjZLilpJmwU0Rs=
 golang.org/x/sys v0.48.0 h1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=

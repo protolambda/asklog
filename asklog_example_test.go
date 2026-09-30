@@ -34,3 +34,14 @@ func ExampleConfig() {
 	// INFO  Hello world!                             foobar=123
 	// DEBUG Catch the bugs!
 }
+
+func ExampleConfig_New() {
+	// The zero Config logs info and higher levels to os.Stdout, in the terminal format,
+	// without time, color or source info.
+	var cfg asklog.Config
+	logger := cfg.New()
+	logger.Info("Hello world!", "foobar", 123)
+	logger.Debug("Catch the bugs!")
+	// Output:
+	// INFO  Hello world!                             foobar=123
+}
